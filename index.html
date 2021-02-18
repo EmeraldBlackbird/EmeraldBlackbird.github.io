@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    
+        <!--SETUP-->
+        <meta charset="utf-8">
+        <meta name="description" 
+            content="A sketchpad on Khan Academy 
+            for drawing, doodling, and scratch work.">
+        <meta name="author" content="Prisha B.">
+        <title>Sketchpad v2</title>
+           
+        <!--SOURCES-->
+        <!--p5.js source-->
+        <script rel="proconnect" src="https://cdn.jsdelivr.net/gh/NovaSagittarii/misc@1.0.2/p5.min.js"></script>
+        <!--Font family-->
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+        
+        <!--Learning Sources-->
+        <!--MDN, StackOverflow, w3schools-->
+        
+        <!--STYLING-->
+        <!--General-->
+        <style>
+            /*Text*/
+            * {
+                font-family: Lato, sans-serif;
+                color: rgb(230, 230, 230);
+            }
+            /*Overflow and cursor*/
+            :root {
+                overflow: hidden;
+                cursor: crosshair;
+            }
+            /*BODY*/
+            body {
+                background-color: rgb(41, 39, 51);
+                touch-action: none;
+                padding: 0px;
+                margin: 0px;
+                /*DISABLE ABILITY TO SELECT TEXT*/
+                /* Safari */
+                -webkit-user-select: none; 
+                /* Konqueror HTML */ 
+                -khtml-user-select: none; 
+                /*Old versions Firefox */
+                -moz-user-select: none; 
+                /*Internet Explorer/Edge */
+                -ms-user-select: none; 
+                /* Non-prefixed version*/
+                user-select: none;
+            }
+            /*Cursor*/
+            button, input, .tab {
+                cursor: pointer;
+            }
+            /*LINKS*/
+            a {
+                color: rgb(63, 173, 252);
+                text-decoration: none;
+            }
+            a:hover {
+                color: rgb(82, 206, 255);  
+            }
+            a:active {
+                color: rgb(0, 145, 255);
+            } 
+            /*SIDEBAR*/
+            #sidebar-container {
+                width: 200px;
+                height: 400px;
+            }
+        </style>
+        <!--Buttons-->
+        <style>
+            #top-btns-container {
+                width: 199px;
+                position: absolute;
+                left: 4px;
+                top: 3px;
+            }
+            #bottom-btns-container .btn {
+                display: block;
+                position: absolute;
+                left: 32px;
+                width: 138px;
+            }
+            #eyedropper-button {
+                width: 97px;
+            }
+            #undo-button, #redo-button {
+                width: 43px;
+            }
+            /*The banner that displays
+              if user cannot undo/redo*/
+            #nope-banner {
+                display: none;
+                /*Position*/
+                position: absolute;
+                transform: translate(50%, -50%);
+                right: 200px;
+                top: 50px;
+                /*Shape*/
+                width: 80px;
+                padding: 11px;
+                border: none;
+                border-radius: 5px;
+                /*Color and text*/
+                color: rgb(255, 255, 255);
+                text-align: center;
+                font-size: 1.2em;
+                background-color: rgb(199, 199, 199);
+            }
+            .eyedropper-active {
+                background-color: rgb(128, 128, 128) !important;
+            }
+            /*MAIN BUTTON CLASS*/
+            .btn {
+                outline: none;
+                border: none;
+                border-radius: 9px;
+                border-bottom: solid 2px rgb(61, 61, 61);
+                background-color: rgb(84, 84, 84);
+                -webkit-transition: 0.1s;
+                transition: 0.1s;
+                text-align: center;
+            }
+            .btn:hover:enabled {
+                background-color: rgb(105, 105, 105);
+            }
+            .btn:active {
+                transform: translate(0, 2px);
+                border: none;
+            }
+        </style>
+        <!--Sliders-->
+        <style>
+            #sliders-container {
+                position: absolute;
+                top: 140px;
+                width: 197px;
+            }
+            #sliders-container form {
+                margin: 12px;
+            }
+            #sliders-container label {
+                font-size: 0.85em;
+            }
+            /* Chrome, Safari, Edge, Opera - disable arrows
+               on number input*/
+            #sliders-container input::-webkit-outer-spin-button,
+            #sliders-container input::-webkit-inner-spin-button {
+              -webkit-appearance: none;
+              margin: 0;
+            }
+            /*STYLE NUMBER INPUTS*/
+            #sliders-container input[type="number"] {
+                /*disable arrows */
+                -moz-appearance: textfield;
+                /*position and size*/
+                position: absolute;
+                right: 10px;
+                height: 14px;
+                width: 30px;
+                /*borders and padding*/
+                padding: 1px;
+                outline: none;
+                border: none;
+                border-radius: 4px;
+                /*etc*/
+                background-color: rgb(255, 255, 255, 8%);
+                text-align: center;
+                font-size: 0.75em;
+            }
+            /*STYLE SLIDERS*/
+            #sliders-container .slider {
+                display: block;
+                /*Remove default appearance*/
+                -webkit-appearance: none;   
+                appearance: none;
+                /*margin, padding, borders*/
+                margin: 0px;
+                margin-top: 9px;
+                margin-bottom: 15px;
+                padding: 0px;
+                outline: none;
+                /*Style the slider*/
+                border-radius: 15px;
+                width: 100%;
+                height: 5px;
+                background-color: rgb(255, 255, 255, 14%);
+                opacity: 70%;
+            }
+            /*Style the knob of sliders*/
+            .slider::-webkit-slider-thumb {
+                /*Remove default appearance*/
+                -webkit-appearance: none; 
+                appearance: none;
+                /*Size, border radius, color*/
+                width: 12px;
+                height: 12px;
+                border-radius: 10px;
+                background-color: rgb(219, 219, 219);
+            }
+            .slider::-moz-range-thumb {
+                /*Size, border radius, color*/
+                width: 12px;
+                height: 12px;
+                border-radius: 10px;
+                background-color: rgb(219, 219, 219);
+            }
+        </style>
+        <!--Canvases-->
+        <style>
+            /*Main canvas where user draws*/
+            #drawing-canvas {
+                position: absolute;
+                top: 0px;
+                right: 0px;
+            }
+            /*Where user selects hsb of brush color*/
+            #color-select-canvas {
+                position: absolute;
+                top: 35px;
+                left: 0px;
+            }
+        </style>
+        <!--Modals-->
+        <style>
+            @keyframes fadeIn {
+                /*Fade in animation*/
+                from {
+                    opacity: 0%;
+                } to {
+                    opacity: 100%;   
+                }
+            }
+            .modal.show {
+                display: block;
+                visibility: visible;
+                animation: fadeIn 0.3s;
+            }
+            /*STYLE MODALS*/
+            .modal {
+                display: none;
+                visibility: hidden;
+                /*Positioning*/
+                z-index: 1;
+                position: absolute;
+                right: 200px;
+                top: 200px;
+                -webkit-transform: translate(50%, -50%));
+                transform: translate(50%, -50%);
+                /*etc*/
+                border-radius: 15px;
+                background-color: rgb(49, 49, 56, 96%);
+                text-align: center;
+                font-size: 1.0em;
+            }
+            .modal .small-text {
+                font-size: 0.78em;
+            }
+            /*CLEAR MODAL*/
+            #clear-modal {
+                width: 260px;
+                height: 150px;
+            }
+            #clear-modal .btn {
+                margin: 7px;
+                width: 30%;
+            }
+            #clear-modal p {
+                margin: 29px;
+            }
+            /*COPY DATA MODAL*/
+            #copy-data-modal {
+                width: 300px;
+                height: 180px;
+            }
+            #copy-data-modal p {
+                margin: 27px;
+            }
+            #copy-data-modal .btn {
+                margin: 4px;
+                width: 35%;
+            }
+            /*SAVE TO PJS MODAL*/
+            #save-modal {
+                width: 300px;
+                height: 170px;
+            }
+            #save-modal p {
+                margin: 22px;
+            }
+            #save-modal form {
+                display: block;
+            }
+            #save-modal label {
+                font-size: 0.9em;
+            }
+            #save-modal .btn {
+                width: 35%;
+                margin: 9px;
+                margin-top: 24px;
+            }
+            /*IMPORT MODAL*/
+            #import-modal {
+                width: 310px;
+                height: 280px;
+            }
+            /*Textarea where user pastes data*/
+            #import-modal textarea {
+                /*positioning and size*/
+                -webkit-transform: translateX(-50%);
+                transform: translateX(-50%);
+                position: absolute;
+                left: 50%;
+                width: 82%;
+                height: 54%;
+                resize: none;
+                /*etc*/
+                border-radius: 4px;
+                border: solid 1px rgb(112, 112, 112);
+                outline: none;
+                background-color: rgb(255, 255, 255, 3%);
+            }
+            #import-modal .btn {
+                margin: 7px;
+                margin-top: 175px;
+                width: 36%;
+            }
+        </style>
+        <!--Help Page-->
+        <style>
+            #help-page {
+                /*position, size*/
+                -webkit-transform: translate(-50%, -50%));
+                transform: translate(-50%, -50%);
+                top: 50%;
+                left: 50%;
+                width: 94%;
+                height: 92%;
+                z-index: 2;
+                /*etc*/
+                padding: 2%;
+                border-radius: 10px;
+                text-align: left;
+                background: rgb(62, 63, 71);
+            }
+            /*holds current content of help page*/
+            #help-content-container {
+                width: 100%;
+                height: 95%;
+                margin: 0px;
+                padding: 0px;
+                border-radius: 0px 0px 10px 10px;
+                background-color: rgb(255, 255, 255, 5%); 
+            }
+            /*HELP PAGE TABS*/
+            #help-page .tab {
+                display: inline;
+                margin: 0px;
+                padding-left: 3%;
+                padding-right: 3%;
+                padding-top: 1%;
+                border-radius: 10px 10px 0px 0px;
+                -webkit-transition: 0.2s;
+                transition: 0.2s;
+            }
+            #help-page .tab.active {
+                background-color: rgb(255, 255, 255, 5%); 
+            }
+            #help-page .tab.hidden:hover {
+                background-color: rgb(255, 255, 255, 11%);
+            }
+            /*HELP PAGE CONTENT*/
+            .tab-content {
+                display: none;
+                /*position, size*/
+                position: absolute;
+                top: 8%;
+                left: 5%;
+                width: 93%;
+                height: 89%;
+                /*etc*/
+                animation: fadeIn 0.5s;
+                overflow: auto;
+            }
+            /*Lists in help content*/
+            .tab-content ol, .tab-content ul {
+                width: 75%;
+            }
+            /*Close help page button*/
+            #close-help-button {
+                position: absolute;
+                right: 2%;
+                top: 2%;
+                font-size: 0.75em;
+            }
+            /*Disabled buttons*/
+            #help-page .btn:disabled {
+                border: rgb(15, 15, 15);
+                background-color: rgb(105, 105, 105);
+            }
+        </style>
+        
+    </head>
+    <body>
+        
+        <!--SKETCH DATA-->
+        <script type="application/javascript">
+            
+            /**PASTE YOUR SAVE CODE HERE**/
+            /**You must do this every time
+               you want to save**/
+            
+            var saveData = "";
+            
+            /*The maximum number of strokes
+              you can undo at once*/
+            var undoCap = 70;
+            
+        </script>
+    
+        <!--Sidebar Area-->
+        <div id="sidebar-container">
+            
+            <!--Top Buttons-->
+            <div id="top-btns-container">
+                <!--Undo and Redo Buttons-->
+                <button class="btn" id="undo-button"
+                    onclick="sketch.undo()"
+                    title="Undo your last stroke">
+                    Undo</button>
+                <button class="btn" id="redo-button"
+                    onclick="sketch.redo()"
+                    title="Redraw your last undo">
+                    Redo</button>
+                <!--Eyedropper Button-->
+                <button class="btn" id="eyedropper-button"
+                    onclick="eyedropper.init();"
+                    title="Select a color from the canvas">
+                    Eyedropper</button>
+            </div>
+            
+            <!--Color Wheel Canvas-->
+            <div id="color-select-canvas"
+                title="Set the color of your brush"></div>
+            
+            <!--Sliders-->
+            <div id="sliders-container">
+                <!--Alpha Slider-->
+                <form id="alpha-select" 
+                    title="Set the transparency of your brush">
+                    <label for="alphaSlider">Opacity</label>
+                    <!--Number Input-->
+                    <input type="number" id="alpha-value"
+                        oninput="aSlider.value=aVal.value"
+                        name="aVal" min="1" max="255"
+                        value="255">
+                    <!--Range Slider-->
+                    <input type="range" id="alpha-slider"
+                        oninput="aVal.value=aSlider.value"
+                        name="aSlider" min="1" max="255"
+                        value="255" class="slider">
+                </form>
+                <!--Size Slider-->
+                <form id="size-select"
+                    title="Set the size of your brush">
+                    <label for="size-slider">Size</label>
+                    <!--Number Input-->
+                    <input type="number" id="size-value"
+                        oninput="sizeSlider.value=sizeVal.value"
+                        name="sizeVal" value="10"
+                        min="1" max="200">
+                    <!--Range Slider-->
+                    <input type="range" id="size-slider" 
+                        oninput="sizeVal.value=sizeSlider.value"
+                        name="sizeSlider" 
+                        min="1" max="200"
+                        value="10" class="slider">  
+                </form>  
+            </div>
+            
+            <!--Bottom Btns-->
+            <div id="bottom-btns-container">
+                <!--Save (PJS)-->
+                <button onclick="openModal('save-modal')"
+                    class="btn" title="See your sketch in PJS">
+                    Save Sketch (PJS)</button>
+                <!--Copy Data-->
+                <button onclick="openModal('copy-data-modal')"
+                    class="btn"
+                    title="Copy sketch data to clipboard">
+                    Copy Data</button>
+                <!--Import-->
+                <button id="import-modal-button" class="btn"
+                    title="Import your sketch data"
+                    onclick=""> Import Sketch</button>
+                <!--Clear Canvas-->
+                <button onclick="openModal('clear-modal');"
+                    id="clear-modal-button" class="btn"
+                    title="Clear the canvas">Clear</button>
+                <!--Help Button-->
+                <button id="help-button" class="btn"
+                    title="Learn how to use this sketchpad"
+                    onclick="">Help</button>
+            </div>
+            
+        </div>
+        
+        <!--Drawing Canvas-->
+        <div id="drawing-canvas"></div>
+        
+        <!--Clear Modal-->
+        <div class="modal" id="clear-modal">
+            <!--Message-->
+            <p>Are you sure? You will not be able to 
+                undo this action.</p>
+            <!--Close-->
+            <button onclick="closeModal('clear-modal')"
+                class="btn">Cancel</button>
+            <!--Clear button-->
+            <button class="btn" id="clear-button">
+                Clear</button>
+        </div>
+        
+        <!--Copy Data Modal-->
+        <div id="copy-data-modal" class="modal">
+            <!--Message-->
+            <p>Copy your save data here. 
+               Paste it into the 
+               Import modal or into this
+               text editor to continue 
+               working on it later.</p>
+            <!--Close button-->
+            <button onclick="closeModal('copy-data-modal')"
+                class="btn">Close</button>
+            <!--Copy Data Button-->
+            <button id = "copy-data-button"
+                onclick="sketch.copyData()"
+                class="btn">Copy Data</button>
+        </div>
+        
+        <!--Save Modal-->
+        <div class="modal" id="save-modal">
+            <!--Message-->
+            <p>Copy your sketch's code here.<br>Then, paste it into a <a target="_blank" href="https://www.khanacademy.org/computer-programming/new/pjs">new program</a>.</p>
+            <!--Checkbox for if you want it animated-->
+            <form>
+                <input type="checkbox" name="animated-checkbox"
+                    id="animated-check" checked>
+                <label for="animated-checkbox">Animated?</label>
+            </form>
+            <!--Close Button-->
+            <button onclick="closeModal('save-modal')"
+                class="btn">Close</button>
+            <!--Copy Code Button-->
+            <button id="save-pjs-button"
+                class="btn">Copy Code</button>
+        </div>
+        
+        <!--Import Modal-->
+        <div class="modal" id="import-modal">
+            <!--Message-->
+            <p>Paste your sketch data here.<br>
+                <span class="small-text">
+                    CAUTION: If you restart, 
+                    you'll lose your sketch!
+                </span>
+            </p>
+            <!--Input Area-->
+            <textarea id="data-input"></textarea>
+            <!--Close Button-->
+            <button onclick="closeModal('import-modal')"
+                class="btn">Cancel</button>
+            <!--Import Button-->
+            <button class="btn" id="import-button">
+                Import</button>
+        </div>
+        
+        <!--Help Page-->
+        <div id="help-page" class="modal">
+        
+            <!--Tablinks-->
+            <h5 id="tools-help-tab" 
+                class="tab active">Tools</h5>
+            <h5 id="saving-help-tab"
+                class="tab hidden">Saving Your Sketch</h5>
+            <h5 id="data-help-tab"
+                class="tab hidden">Save Data</h5>
+                
+            <!--Close page button-->
+            <button id="close-help-button"
+                class="btn">X</button>
+                
+            <!--Tab Content-->
+            
+            <!--Tools-->
+            <div class="tab-content" id="tools-help">
+                <h2>An outline of the drawing tools 
+                    in this sketchpad</h2>
+                <h4>Canvas</h4>
+                <p>Drag your mouse over the canvas
+                    to draw. Having issues with the
+                    webpage size? Go <a target="_blank" href="https://www.khanacademy.org/computer-programming/-/6752141210763264?width=600&height=400&editor=no">here</a> 
+                    to use this sketchpad without
+                    the text editor. Go <a target="_blank" href="https://www.khanacademy.org/computer-programming/-/6752141210763264?width=600&height=400">here</a> 
+                    to use this sketchpad with the 
+                    text editor.
+                </p>
+                <h4>Color Picker</h4>
+                <p>Pick the brush's hue and saturation with
+                    the rainbow color wheel. To change the
+                    brightness, use the brightness selector
+                    to the right. To change the opacity
+                    of the color, drag the opacity slider
+                    or input a number into the text box.
+                <h4>Size Picker</h4>
+                <p>Pick the size of your brush using 
+                    the size slider or inputting a
+                    number into the text box. The brush
+                    size can be anywhere between 1 and 200.
+                    You can see the brush's current color
+                    and size by hovering your mouse over 
+                    the canvas.</p>
+                <h4>Undo and Redo</h4>
+                <p>If you would like to undo a stroke,
+                    click <button class="btn" disabled>
+                    Undo</button>. If you would like to
+                    redraw that undone stroke, click
+                    <button class="btn" disabled>
+                    Redo</button>. You may also undo by
+                    pressing Z or redo by pressing R
+                    on your keyboard. Please note that
+                    the maximum number of strokes you
+                    can undo at once is 70. If you would
+                    like to change this, change the value
+                    of the variable named <em>undoCap</em>.</p>
+                <h4>Eyedropper</h4>
+                <p>To choose a color directly from the
+                    canvas, click the <button class="btn"
+                    disabled>Eyedropper</button> button.
+                    Then, use the eyedropper to select a
+                    color from the canvas. Keep in mind that
+                    the opacity of the brush color would be
+                    100%, but the brush size will stay
+                    the same. If you entered the eyedropper mode
+                    in error, just click the <button class="btn"
+                    disabled>Eyedropper</button> button 
+                    again to cancel.</p>
+                <h4>Clear</h4>
+                <p>If you would like to clear the entire
+                    canvas, just click the <button class="btn"
+                    disabled>Clear</button> button, and
+                    select it again to confirm. Please note:
+                    you will not be able to undo this
+                    action.</p>
+            </div>
+            <!--Saving-->
+            <div class="tab-content" id="saving-help">
+                <h2>Save your sketch</h2>
+                <p><strong>See an example of an animated
+                   sketch <a target="_blank" href="https://www.khanacademy.org/computer-programming/-/6516058636107776">
+                   here</a> or a still sketch <a target="_blank" href="https://www.khanacademy.org/computer-programming/-/4727300924325888">here</a>.</strong>
+                   <br>If you're clever, perhaps you can find
+                   out a way to do <a target="_blank" href="https://www.khanacademy.org/computer-programming/-/5523310353268736">
+                    stop motion animation</a>.
+                </p>
+                <!--Ordered List of how to save-->
+                <ol>
+                    <li>
+                        <p>First, click <button class="btn"
+                            disabled> Save Sketch (PJS)</button>
+                            to open the modal.</p>
+                    </li>
+                    <li>
+                        <p>Indicate whether you would like your
+                            sketch animated with the 
+                            checkbox.</p>
+                    </li>
+                    <li>
+                        <p>Click <button class="btn" disabled>
+                            Copy Code </button> to copy your
+                            sketch code to the clipboard.</p>
+                    </li>
+                    <li>
+                        <p>Open a <a target="blank" href="https://www.khanacademy.org/computer-programming/new/pjs">
+                            new program</a> and paste.</p>
+                    </li>
+                    <li>
+                        <p>You should now see your sketch,
+                            either fully complete or 
+                            being drawn on the canvas.</p>
+                    </li>
+                    <li>
+                        <p>Enjoy! To find out how to edit
+                            your sketch later, check out the
+                            "Save Data" tab. If you would
+                            like to copy/download the image
+                            on the PJS canvas, right-click
+                            to open the context menu.</p>
+                    </li>
+                </ol>
+            </div>
+            <!--Finding and Using Save Data-->
+            <div class="tab-content" id="save-data-help">
+                <h2>Obtain and use your 
+                    sketch's save data</h2>
+                <p>You can use your sketch's save data
+                    to work on it later. Here's how:</p>
+                <!--How to find save data-->
+                <h3>Get your save data...</h3>
+                <ul>
+                    <li>
+                        <p><strong>from the sketchpad: </strong>
+                            Click <button class="btn" 
+                            disabled>Copy Data</button>,
+                            then select it again to
+                            copy your save data to
+                            the clipboard.</p>
+                    </li>
+                    <li>
+                        <p><strong>from a sketch in PJS: 
+                           </strong>Locate the variable named 
+                           <em>saveData</em>. The long string 
+                           is your sketch's save data.</p>
+                    </li>
+                </ul>
+                <!--Where to paste it in-->
+                <h3>Paste in your save data</h3>
+                <p>There are two ways to paste in
+                    your save data in order to
+                    edit your sketch. Note that
+                    anything already present
+                    on the canvas will be replaced
+                    with the newly "imported" sketch.</p>
+                <ul>
+                    <li>
+                        <p><strong>To paste it via 
+                            the sketchpad itself:</strong> 
+                            click <button class="btn"
+                            disabled>Import Sketch</button>,
+                            paste your sketch data into 
+                            the text box, and select
+                            <button class="btn" disabled>
+                            Import</button>. Please note:
+                            if you restart this program,
+                            your sketch will be lost.</p>
+                    </li>
+                    <li>
+                        <p>You can also paste the save code 
+                            into the <strong>text editor
+                            </strong> of this program. 
+                            Locate the variable named
+                            <em>saveData</em> and replace
+                            the empty string with your
+                            save data.</p>
+                    </li>
+                </ul>
+            </div>
+            
+            <!--Container - where content will be-->
+            <div id="help-content-container"></div>
+            
+        </div>
+        
+        <!--"Nope" Banner-->
+        <div id="nope-banner">
+            Nope</div>
+        
+        <!--Misc-->
+        <script type="application/javascript">
+            
+            /*Memoization - DOM nodes*/
+            var memo = {};
+        
+            /*A function to get element by id*/
+            function getById(id) {
+                /*If the element
+                  exists in the memo*/
+                if (memo[id]) {
+                    /*Return that element*/
+                    return memo[id];
+                } else {
+                    /*Else find by id*/
+                    const el = document.getElementById(id);
+                    /*Define it in the memo*/
+                    memo[id] = el;
+                    /*Return the element*/
+                    return el;
+                }
+            }
+            
+            /*A function to create an element*/
+            function createEl(el) {
+                return document.createElement(el);
+            }
+            
+            /*A function to temporarily change
+              the text content of something*/
+            function tempTxt(el, initTxt, txt, time) {
+                /*default amt of time*/
+                time = time || 600;
+                /*change text of element*/
+                el.textContent = txt;
+                /*After a while, change back txt*/
+                window.setTimeout(function() {
+                    el.textContent = initTxt;
+                }, time);
+            }
+            
+            /*Check if mouse is in canvas*/
+            function mouseIn(mx, my, w, h) {
+                return mx > 0 &&
+                       my > 0 &&
+                       mx < w &&
+                       my < h;
+            }
+            
+        </script>
+        
+        <!--Setup: User-->
+        <script type="application/javascript">
+            
+            /*User data*/
+            var user = {
+                /*What the is user doing right now*/
+                modalOpen: false,
+                drawing: false,
+                dragging: false,
+                pickingClr: false,
+                /*Brush*/
+                currClr: [255, 0, 0, 255],
+                currSize: parseInt(getById("size-slider").value),
+                /*To see if the user changed clr or size
+                  since last stroke*/
+                changedClr: true,
+                prevSize: null,
+                maxSize: parseInt(getById("size-slider").max),
+                currStroke: null,
+                /*Function to set color*/
+                setClr: function(clr) {
+                    user.changedClr = true;
+                    /*If clr passed, set clr*/
+                    if (clr) {
+                        user.currClr = clr;
+                    }
+                    /*Set opacity according to slider*/
+                    const aSlider = getById("alpha-slider");
+                    let a = parseInt(aSlider.value, 10);
+                    /*specify to certain range*/
+                    a = Math.max(Math.min(a, 255), 1);
+                    user.currClr[3] = a;
+                },
+            };
+            
+            /*Check if the user is idle*/
+            user.notBusy = function() {
+                return !user.modalOpen &&
+                       !user.drawing &&
+                       !user.dragging &&
+                       !user.pickingClr
+            };
+            
+        </script>
+        
+        <!--Handle Sketch Data-->
+        <script type="application/javascript">
+        
+            var sketch = {
+                /*Array of strokes represented
+                  as strings*/
+                data: [],
+                /*For undos and redos*/
+                pointer: -1,
+                undoCap: undoCap > 0 ? undoCap : 70,
+                imgStack: [],
+                earliest: null,
+                /*Constants for sketch data*/
+                ptLen: 4,
+                /*Number Systems to reduce
+                  number of characters
+                  Size - 18
+                  Clr - hex (16)
+                  Points - 26*/
+                sizeBase: 18,
+                ptBase: 36,
+                /*Check and update image
+                  stack (states)*/
+                updateImgStack: function() {
+                    /*Called after each stroke*/
+                    /*Add state to image stack*/
+                    this.imgStack.push(get());
+                    /*If image stack too large, shift*/
+                    if (this.imgStack.length > this.undoCap) {
+                        const e = this.imgStack.shift();
+                        this.earliest = e;
+                    } else {
+                        this.pointer++;
+                    }
+                },
+                /*Draw the current frame*/
+                drawCurrFrame: function() {
+                    /*If there are images in the stack*/
+                    if (this.pointer >= 0) {
+                        image(this.imgStack[this.pointer], 
+                              0, 0);
+                    } else {
+                        /*draw the earliest image
+                          (will change each time
+                           if undoCap is reached)*/
+                        image(this.earliest, 0, 0);
+                    }
+                },
+                /*Check the state of the data*/
+                checkState: function() {
+                    /*If user undos, then draws
+                      something else, make sure
+                      they wouldn't be able to redo*/
+                    if (this.pointer < 
+                        this.imgStack.length-1) {
+                        /*Remove undoable strokes
+                          from index pointer + 1 
+                          to end*/
+                        const numToRemove = this.imgStack.length-
+                            1-this.pointer;
+                        this.imgStack.splice(
+                            this.pointer+1,
+                            numToRemove
+                        );
+                        this.data.splice(
+                            this.data.length -
+                            numToRemove,
+                            numToRemove
+                        );
+                        /*Set pointer to last image
+                          in the stack*/
+                        this.pointer = this.imgStack.length-1;
+                    }
+                },
+                /*check if data is empty*/
+                dataNotEmpty: function() {
+                    if (this.data.length > 0) {
+                        return true;
+                    } else {
+                        alert("There's nothing to copy!");
+                    }
+                },
+                /*functions for when reading data*/
+                handleSettings: function(str) {
+                    /*only size set in string*/
+                    if (str.length === 2) {
+                        /*change strokeweight*/
+                        strokeWeight(parseInt(str, 
+                                     this.sizeBase));    
+                    } else if (str.length === 8) {
+                        /*only clr set in string*/
+                        /*Change color*/
+                        stroke("#"+str);
+                    } else {
+                        /*Set size with first two chars*/
+                        strokeWeight(parseInt(str.slice(0, 2),
+                                        this.sizeBase));
+                        /*set color with other chars*/
+                        stroke("#"+str.slice(2, 10));
+                    }
+                },
+                drawPts: function(pts) {
+                    /*Each point is actually the
+                      index number of the pixels
+                      buffer, converted to base 36.*/
+                    /*Loop through points*/
+                    for (let i = this.ptLen; 
+                         i < pts.length; i+=this.ptLen) {
+                        const prev = parseInt(
+                            pts.slice(i-this.ptLen, i), 
+                            this.ptBase
+                        );
+                        const pt = parseInt(
+                            pts.slice(i, i+this.ptLen), 
+                            this.ptBase
+                        );
+                        if (pt >= 0 && prev >= 0) {
+                            /*Draw the line*/
+                            /*x is remainder of 
+                              index number / width*/
+                            /*y is index number / width*/
+                            line(
+                                prev % width,
+                                prev / width,
+                                pt % width,
+                                pt / width
+                            );
+                        }
+                        
+                    }
+                },
+                drawStroke: function(str) {
+                    /*str may or may not specify
+                      clr or size*/
+                    const curr = str.split(",");
+                    let pts;
+                    /*If not, the points is just str*/
+                    if (curr.length === 1) {
+                        pts = curr[0];
+                    } else if(curr.length === 2) {
+                        /*If so, the settings
+                          are the first item in array,
+                          pts are second*/
+                        pts = curr[1];
+                        this.handleSettings(curr[0]);
+                    }
+                    this.drawPts(pts);
+                },
+                initSketch: function() {
+                    /*Set earliest image*/
+                    this.earliest = get();
+                    /*if user put in save data*/
+                    if (saveData.length > 0) {
+                        /*split into array, set data*/
+                        const strokes = saveData.split(";");
+                        this.data = strokes;
+                        /*loop through strokes*/
+                        for (let i = 0;
+                             i < strokes.length; 
+                             i++) {
+                            this.drawStroke(strokes[i]);
+                            this.updateImgStack();
+                        }
+                    }
+                },
+                /*Undo and Redo*/
+                nopeBanner: function() {
+                    /*Get banner by id*/
+                    const b = getById("nope-banner");
+                    /*show*/
+                    b.style.display = "block";
+                    b.style.opacity = "1.5";
+                    /*Fade out*/
+                    function fade() {
+                        if (b.style.opacity > 0) {
+                            b.style.opacity -= 0.1;
+                        } else {
+                            b.style.display = "none";
+                            window.clearInterval(time);
+                        }
+                    }
+                    let time = window.setInterval(fade, 30);
+                },
+                undo: function() {
+                    /*If user is idle*/
+                    if (user.notBusy()) {
+                        if (this.pointer >= 0) {
+                            /*So that next stroke
+                              will have settings
+                              prefix with clr and size*/
+                            user.changedClr = true;
+                            user.prevSize = null;
+                            /*Decrement pointer*/
+                            this.pointer--;
+                            /*Images*/
+                            this.drawCurrFrame();
+                        } else {
+                            /*If there's nothing to
+                              undo, display "Nope"*/
+                            this.nopeBanner();
+                        }
+                    }
+                },
+                redo: function() {
+                    /*If user is idle*/
+                    if (user.notBusy()) {
+                        if (!user.modalOpen &&
+                            !user.pickingClr &&
+                            this.pointer < 
+                            this.imgStack.length-1) {
+                            this.pointer++;
+                            this.drawCurrFrame();
+                        } else {
+                            this.nopeBanner();
+                        }
+                    }
+                },
+                /*Copy and clear and import data*/
+                copyText: function(str) {
+                    /*Create textarea, set content
+                      to string, and copy*/
+                    const txt = createEl("textarea");
+                    txt.textContent = str;
+                    document.body.appendChild(txt);
+                    txt.select();
+                    txt.setSelectionRange(0, 999999999);
+                    document.execCommand("copy");
+                    document.body.removeChild(txt);  
+                },
+                copyData: function() {
+                    if (this.dataNotEmpty()) {
+                        /*Remove strokes after pointer*/
+                        this.checkState();
+                        /*Get data string*/
+                        const str = this.data.join(";");
+                        /*Copy text*/
+                        this.copyText(str);
+                        /*Change button label*/
+                        tempTxt(getById("copy-data-button"),
+                                "Copy Data", "Success!");
+                    }
+                },
+                clearData: function() {
+                    /*Clear everything*/
+                    this.data = [];
+                    this.imgStack = [];
+                    this.pointer = -1;
+                    background(255);
+                    this.earliest = get();
+                },
+                importData: function() {
+                    const input = getById("data-input");
+                    if (input.value.length > 0) {
+                        /*Clear everything*/
+                        this.clearData();
+                        /*change save data to input value*/
+                        saveData = input.value;
+                        /*Draw sketch from saveData*/
+                        this.initSketch();
+                    } else {
+                        alert("Please paste your " +
+                              "save data into the " +
+                              "text box.");
+                    }
+                },
+                /*Copy sketch pjs*/
+                copyStillSketch: function() {
+                    /*Remove undos*/
+                    this.checkState();
+                    if (this.dataNotEmpty()) {
+                        /*Get starting string*/
+                        let strng = this.pjsCode.startString();
+                        /*add function to draw sketch*/
+                        strng += this.pjsCode.drawStill;
+                        /*add code to draw image*/
+                        strng += "\n\n";
+                        strng += this.pjsCode.drawImg;
+                        /*Copy the text*/
+                        this.copyText(strng);
+                    }
+                },
+                copyAnimatedSketch: function() {
+                    /*Remove undos*/
+                    this.checkState();
+                    if (this.dataNotEmpty()) {
+                        /*get starting string*/
+                        let strng = this.pjsCode.startString();
+                        /*Add setup*/
+                        strng += this.pjsCode.animatedSetup;
+                        strng += "\n\n";
+                        /*Add function*/
+                        strng += this.pjsCode.drawAnimated;
+                        strng += "\n\n";
+                        /*Add draw function*/
+                        strng += this.pjsCode.drawFunct;
+                        /*Copy the text*/
+                        this.copyText(strng);
+                    }
+                },
+                /*Add to sketchData when user draws*/
+                initStroke: function() {
+                    /*When user starts drawing, called once*/
+                    /*Remove undos after pointer*/
+                    this.checkState();
+                    let strng = "";
+                    let addComma = false;
+                    /*If size is different*/
+                    if (user.prevSize !== user.currSize) {
+                        let s = user.currSize;
+                        /*Add size to settings string*/
+                        strng += s.toString(this.sizeBase)
+                                  .padStart(2, 0);
+                        addComma = true;
+                    }
+                    /*If color of last stroke was different*/
+                    if (user.changedClr) {
+                        /*Get color*/
+                        let clr = color(user.currClr);
+                        let c = clr.toString("#rrggbb");
+                        /*Remove hashtag*/
+                        c = c.substring(1);
+                        /*There's a bug when opacity < 16,
+                          so just add it manually*/
+                        let aVal = user.currClr[3].toString(16);
+                        c += aVal.padStart(2, 0);
+                        /*Add color to settings strng*/
+                        strng += c;
+                        addComma = true;
+                        user.changedClr = false;
+                    }
+                    /*Add comma to denote that we
+                      are giving a settings prefix
+                      to the string for this stroke*/
+                    if (addComma) {
+                        strng += ",";
+                    }
+                    /*Set current stroke to string*/
+                    user.currStroke = strng;
+                },
+                buildStroke: function(x, y) {
+                    /*When user is drawing*/
+                    /*Find index of pixel*/
+                    const pt = Math.floor(x + y * width);
+                    /*Add to current stroke*/
+                    const n = pt.toString(this.ptBase).padStart(this.ptLen, 0);
+                    user.currStroke += n;
+                },
+                finishStroke: function() {
+                    /*Called when mouse released
+                      when drawing*/
+                    user.prevSize = user.currSize;
+                    this.data.push(user.currStroke);
+                    this.updateImgStack();
+                }
+            };
+            
+        </script>  
+        
+        <!--PJS code to use when saving-->
+        <script type="application/javascript">
+        
+            /*
+              The following two functions are not used
+              in this program but are instead converted
+              into strings for when the user decides
+              to save their sketch in PJS. toString() 
+              preserves tabs, so the following 
+              functions are NOT tabbed in order
+              for the copied pjs sketch code to 
+              look neater.
+            */
+
+/*Still sketch function PJS*/        
+function createSketch(saveData) {
+    var img = createGraphics(400, 400, P2D);
+    img.background(255, 0);
+    var strokes = saveData.split(";");
+    var pts;
+    for (var i = 0; i < strokes.length; i++) {
+        var curr = strokes[i].split(",");
+        if (curr.length === 1) {
+            pts = curr[0];
+        } else if(curr.length === 2) {
+            pts = curr[1];
+            var settings = curr[0];
+            if (settings.length === 2) {
+                img.strokeWeight(parseInt(
+                    settings, 18
+                ));            
+            } else if (settings.length === 8) {
+                var clr = parseInt(
+                    settings, 16
+                );
+                img.stroke((clr & 0xff) << 24 | 
+                           (clr >>> 8));
+            } else if (settings.length === 10) {
+                img.strokeWeight(parseInt(
+                    settings.slice(0, 2), 18
+                ));
+                var clr = parseInt(
+                    settings.slice(2, 10), 16
+                );
+                img.stroke((clr & 0xff) << 24 | 
+                           (clr >>> 8));
+            }
+        }
+        for (var j = 4; j < pts.length; j+=4) {
+            var pt1 = parseInt(
+                pts.slice(j-4, j), 36
+            );
+            var pt2 = parseInt(
+                pts.slice(j, j+4), 36
+            );
+            img.line(
+                pt1 % img.width,
+                pt1 / img.width,
+                pt2 % img.width,
+                pt2 / img.width
+            );
+        }
+    }
+    return img.get();
+}
+
+/*Animated Sketch function PJS*/
+function drawSketch(saveData) {
+    var pts;
+    for (var i = 0; i < speed; i++) {
+        var curr = strokes[currStroke].split(",");
+        if (curr.length === 2) {
+            pts = curr[1];
+            var settings = curr[0];
+            if (settings.length === 2) {
+                img.strokeWeight(parseInt(
+                    settings, 18
+                ));
+            } else if (settings.length === 8) {
+                var clr = parseInt(settings, 16);
+                img.stroke((clr & 0xff) << 24 | 
+                            clr >>> 8);
+            } else {
+                img.strokeWeight(parseInt(
+                    settings.slice(0, 2), 18
+                ));
+                var clr = parseInt(
+                    settings.slice(2, 10), 16
+                );
+                img.stroke((clr & 0xff) << 24 | 
+                            clr >>> 8);
+            }
+        } else {
+            pts = curr[0];   
+        }
+        if (pts[currPt]) {
+            var p1 = parseInt(
+                pts.slice(currPt-4, currPt), 36
+            );
+            var p2 = parseInt(
+                pts.slice(currPt, currPt+4), 36
+            );
+            img.line(
+                p1 % img.width, 
+                p1 / img.width,
+                p2 % img.width, 
+                p2 / img.width
+            );
+            currPt += 4;
+        } else {
+            currPt = 4;
+            currStroke++;
+            if (!strokes[currStroke]) {
+                noLoop();
+                return;
+            }
+            break;
+        }
+        image(img, 0, 0, width, height);
+    }
+}
+            
+            /*All the pjs code 
+             that may be copied
+             (stringified)*/
+            sketch.pjsCode = {
+                startString: function() {
+                    /*Add credit*/
+                    let strng = "//Created with Sketchpad v2 " +
+                        "by Prisha B." +
+                        "\n//https://www.khanacademy.org/" + 
+                        "computer-programming/-" + 
+                        "/6752141210763264" + 
+                        "?width=600&height=400";
+                    /*Hide from hot list*/
+                    strng += "\n\n\//Important! " +
+                             "If you want your sketch to " +
+                             "be hidden from the Hot List, " +
+                             "make sure this comment is " +
+                             "present when you save your "+
+                             "program for the first time.";
+                    strng += "\n\n// /cs/pro/5733417664643072";
+                    /*Enable context menu*/
+                    strng += "\n\nenableContextMenu();"
+                    /*So that you can fold data*/
+                    strng += "\n\n//Sketch data { \n\n";
+                    /*Declare variable*/
+                    strng += "var saveData = \"";
+                    /*Add data*/
+                    strng += sketch.data.join(";");
+                    /*So that you can fold data*/
+                    strng += "\";\n\n//}\n\n";
+                    return strng;
+                },
+                /*Draw the still image*/
+                drawImg: "/*Draw the image*/" +
+                     "\nvar sketchImg = " +
+                     "createSketch(saveData);" + 
+                     "\nimage(sketchImg, 0, 0, "+
+                     "width, height);",
+                /*Setup/draw for animated sketch*/
+                animatedSetup: "var speed = 5;" +
+                    "\nvar strokes = saveData.split(\";\");" +
+                    "\nvar currStroke = 0;" +
+                    "\nvar currPt = 4;" +
+                    "\nvar img = createGraphics(400, " +
+                    "400, P2D);\nimg.background(255);",
+                drawFunct: "var draw = function() {" + 
+                    "\n    drawSketch();\n};"
+            };
+            
+            sketch.pjsCode.setupCode = (function() {
+                const self = sketch.pjsCode;
+                /*Define functions, remove injections
+                 just in case (because of script type,
+                 this might not happen*/
+                self.drawStill = createSketch.toString()
+                    .replace(/KAInfiniteLoopProtect\(\);/g, "");
+                self.drawAnimated = drawSketch.toString()
+                    .replace(/KAInfiniteLoopProtect\(\);/g, "");
+                /*Dereference functions*/
+                createSketch = null;
+                drawSketch = null;
+            })();
+            
+        </script>
+        
+        <!--Modals and Buttons-->
+        <script type="application/javascript">
+            
+            function openModal(modalId) {
+                if (user.notBusy()) {
+                    /*Show modal*/
+                    user.modalOpen = true;
+                    let modal = getById(modalId);
+                    modal.classList.add("show");
+                }
+            }
+            
+            function closeModal(modalId) {
+                /*Hide modal*/
+                user.modalOpen = false;
+                let modal = getById(modalId);
+                modal.classList.remove("show");
+            }
+            
+            /*CLEAR MODAL*/
+            getById("clear-button").onclick = function() {
+                sketch.clearData();
+                closeModal("clear-modal");
+            };
+            
+            /*SAVE MODAL*/
+            getById("save-pjs-button").onclick = function() {
+                /*Check if user wants animated or still*/
+                if (getById("animated-check").checked) {
+                    sketch.copyAnimatedSketch();
+                } else {
+                    sketch.copyStillSketch();
+                }
+                /*Change button text*/
+                tempTxt(this, "Copy Code", "Copied!");
+            };
+            
+            /*IMPORT MODAL*/
+            getById("import-modal-button").onclick = function() {
+                getById("data-input").value = "";
+                openModal("import-modal");
+            };
+            getById("import-button").onclick = function() {
+                sketch.importData();
+                closeModal("import-modal");
+            };
+            
+            /*HELP MODAL*/
+            getById("help-button").onclick = function() {
+                openModal("help-page");
+                getById("tools-help-tab").click();
+            };
+            getById("close-help-button").onclick = function() {
+                closeModal("help-page"); 
+            };
+            
+            /*Position buttons in bottom container*/
+            /*This is so that they don't push others
+              down if user clicks on them*/
+            (function() {
+                const div = getById("bottom-btns-container");
+                const btns = div.getElementsByClassName("btn");
+                for (let i = 0; i < btns.length; i++) {
+                    btns[i].style.top = 253+i*29 + "px";
+                }
+            })();
+            
+            /*Prevent default*/
+            (function() {
+                const forms = document.getElementsByTagName("form");
+                for (let i = 0; i < forms.length; i++) {
+                    forms[i].onsubmit = function(e) {
+                        e.preventDefault();
+                    };
+                }
+            })();
+            
+        </script>
+
+        <!--Sliders and Tabs-->
+        <script type="application/javascript">
+        
+            /*TABS*/
+        
+            /*Function to open tab in help page*/
+            function openTab(tabcontentId, tab) {
+                /*Get page and pages*/
+                const page = getById(tabcontentId);
+                const pages = document.getElementsByClassName("tab-content");
+                /*Hide all*/
+                for (let i = 0; i < pages.length; i++) {
+                    pages[i].style.display = "none";
+                }
+                /*Show content of tab clicked*/
+                page.style.display = "block";
+                /*Change classes for tabs*/
+                const tabs = document.getElementsByClassName("tab");
+                for (let i = 0; i < tabs.length; i++) {
+                    tabs[i].classList.remove("active");
+                    tabs[i].classList.add("hidden");
+                }
+                tab.classList.add("active");
+                tab.classList.remove("hidden");
+            }
+            
+            /*Set Tabs*/
+            getById("tools-help-tab").onclick = function() {
+                openTab("tools-help", this);
+            };
+            getById("saving-help-tab").onclick = function() {
+                openTab("saving-help", this);  
+            };
+            getById("data-help-tab").onclick = function() {
+                openTab("save-data-help", this);
+            };
+            
+            /*SLIDERS*/
+        
+            function handleSliderForm(form, action) {
+                form.oninput = function() {
+                    /*Set dragging to true if 
+                      user is idle*/
+                    if (user.notBusy()) {
+                        user.dragging = true;
+                    }
+                    /*If action was passed in,
+                      call it*/
+                    if (action) {
+                        action();
+                    }
+                };
+            }
+            
+            /*Alpha/Opacity Slider*/
+            handleSliderForm(getById("alpha-select"), 
+                             user.setClr);
+            
+            /*Side Slider*/
+            handleSliderForm(
+                getById("size-select"), 
+                function() {
+                    /*Set size, check range*/
+                    const s = parseInt(
+                        getById("size-slider").value, 10
+                    );
+                    user.currSize = Math.min(user.maxSize, 
+                                             Math.max(s, 1));
+                }
+            );
+            
+        </script>
+        
+        <!--Color Select Canvas-->
+        <script type="application/javascript">
+            
+            /*Create new p5.js instance*/
+            var clrSelectCanvas = new p5(function(p) {
+                
+                /*constants*/
+                const w = 200;
+                const h = 110;
+                
+                /*COLOR WHEEL*/
+                const clrWheel = {
+                    x: w/3.0,
+                    y: h/2,
+                    r: w*0.25,
+                    clr: p.color(255, 0, 0)
+                };
+                /*Color wheel selector*/
+                clrWheel.selector = {
+                    x: clrWheel.x+clrWheel.r-5,
+                    y: clrWheel.y,
+                    r: 5,
+                    dragging: false,
+                    display: function() {
+                        /*draw selector*/
+                        p.noFill();
+                        p.stroke(255);
+                        p.strokeWeight(this.r/3);
+                        p.ellipse(this.x, this.y, this.r*2);
+                    },
+                    handleDrag: function() {
+                        /*Check if mouse in range
+                          of color wheel*/
+                        const inRange = p.dist(
+                            p.mouseX, 
+                            p.mouseY, 
+                            clrWheel.x, 
+                            clrWheel.y
+                        ) < clrWheel.r - this.r/2;
+                        /*If idle and in Range*/
+                        if (user.notBusy() && 
+                            !this.dragging &&
+                            inRange) {
+                            /*Set to true*/
+                            user.dragging = true;
+                            this.dragging = true;
+                        }
+                        /*If user is being dragged*/
+                        if (this.dragging && inRange) {
+                            /*Change pos and set
+                              color to clr at 
+                              mouseX, mouseY*/
+                            this.x = p.mouseX;
+                            this.y = p.mouseY;
+                            clrWheel.clr = p.get(this.x, 
+                                                 this.y);
+                        }
+                    },
+                    handleRelease: function() {
+                        if (this.dragging) {
+                            this.dragging = false;
+                        }
+                    }
+                };
+                /*The color wheel image itself*/
+                clrWheel.img = function() {
+                    const r = clrWheel.r*2.2;
+                    const img = p.createGraphics(r, r);
+                    img.background(0, 0);
+                    img.angleMode(p.DEGREES);
+                    img.colorMode(img.HSB, 100);
+                    img.translate(img.width/2,
+                                  img.height/2);
+                    img.strokeWeight(5);
+                    /*hue*/
+                    for (let a = 0; a < 360; a+=3) {
+                        img.push();
+                        img.rotate(a);
+                        /*saturation*/
+                        for (let s = 0; s < 100; s+=5) {
+                            let x = p.map(s, 0, 100, 
+                                          0, clrWheel.r);
+                            let h = p.map(a, 0, 360, 
+                                          0, 100);
+                            img.stroke(h, s, 100);
+                            img.point(x, 0);
+                        }
+                        img.pop();
+                    }
+                    /*return image*/
+                    return img.get();
+                };
+                clrWheel.run = function() {
+                    /*Display and run wheel*/
+                    p.image(clrWheel.img, 
+                            clrWheel.x, clrWheel.y);
+                    clrWheel.selector.handleDrag();
+                    clrWheel.selector.display();
+                };
+                
+                /*BRIGHTNESS SELECTOR*/
+                const brightSelect = {
+                    x: w*0.75,
+                    y: clrWheel.y,
+                    w: clrWheel.r*0.52,
+                    h: clrWheel.r*2
+                };
+                /*Gradient clr to black*/
+                brightSelect.img = function() {
+                    const img = p.createGraphics(
+                        brightSelect.w, 
+                        brightSelect.h
+                    );
+                    /*black from opacity 0% to opacity 100%*/
+                    for (let y = 0; y < img.height; y++) {
+                        img.stroke(0, p.map(y, 0, img.height, 
+                                            0, 255));
+                        img.line(0, y, img.width, y);
+                        
+                    }
+                    /*return the image*/
+                    return img.get();
+                };
+                /*selector for brightness*/
+                brightSelect.selector = {
+                    dragging: false,
+                    setup: function() {
+                        /*Use properties to set properties*/
+                        const h = brightSelect.w*0.3;
+                        this.x = brightSelect.x;
+                        this.y = brightSelect.y -
+                                 brightSelect.h/2 + h/2;
+                        this.w = brightSelect.w;
+                        this.h = h;
+                    },
+                    display: function() {
+                        /*Draw selector*/
+                        p.stroke(255);
+                        p.noFill();
+                        p.strokeWeight(1.5);
+                        p.rect(this.x, this.y, this.w, this.h)
+                    },
+                    handleDrag: function() {
+                        const b = brightSelect;
+                        const mx = p.mouseX;
+                        const my = p.mouseY
+                        /*check if mouse within range*/
+                        const inRange = mx>b.x-b.w/2 &&
+                                        mx<b.x+b.w/2 &&
+                                        my>b.y-b.h/2+this.h/2 &&
+                                        my<b.y+b.h/2-this.h/2;
+                        /*If user idle and in range*/
+                        if (user.notBusy() && 
+                            !this.dragging &&
+                            inRange) {
+                            user.dragging = true;
+                            this.dragging = true;
+                        }
+                        /*If selector being dragged*/
+                        if (this.dragging && inRange) {
+                            /*Change pos*/
+                            this.y = p.mouseY;
+                        }
+                    },
+                    handleRelease: function() {
+                        if (this.dragging) {
+                            this.dragging = false;
+                        }
+                    }
+                };
+                brightSelect.run = function() {
+                    /*Draw the curr color and gradient*/
+                    p.noStroke();
+                    p.fill(clrWheel.clr);
+                    p.rect(brightSelect.x, brightSelect.y,
+                           brightSelect.w, brightSelect.h);
+                    p.image(brightSelect.img,
+                            brightSelect.x,
+                            brightSelect.y);
+                    /*Selector*/
+                    brightSelect.selector.handleDrag();
+                    brightSelect.selector.display();
+                };
+                
+                function setBrushClr() {
+                    /*If something was being dragged,
+                     set color to clr at brightness
+                     selector position*/
+                    if (clrWheel.selector.dragging ||
+                        brightSelect.selector.dragging) {
+                        user.setClr(p.get(
+                            brightSelect.selector.x,
+                            brightSelect.selector.y)
+                        );
+                    }
+                }
+                
+                /*SETUP*/
+                p.setup = function() {
+                    
+                    const canvas = p.createCanvas(w, h);
+                    p.angleMode(p.DEGREES);
+                    p.imageMode(p.CENTER);
+                    p.rectMode(p.CENTER);
+                    
+                    /*Overwrite function so it
+                      becomes what it returns*/
+                    clrWheel.img = clrWheel.img();
+                    brightSelect.img = brightSelect.img();
+                    
+                    /*Other setup*/
+                    brightSelect.selector.setup();
+                    
+                    /*Draw everything*/
+                    clrWheel.run();
+                    brightSelect.run();
+                    
+                }
+                
+                /*MOUSE DRAGGED*/
+                p.mouseDragged = function() {
+                    if (mouseIn(p.mouseX, p.mouseY, w, h)) {
+                        p.clear();
+                        clrWheel.run();
+                        brightSelect.run();
+                    }
+                }
+                
+                /*MOUSE RELEASED*/
+                p.mouseReleased = function() {
+                    /*Change color*/
+                    setBrushClr();
+                    /*Handle release*/
+                    clrWheel.selector.handleRelease();
+                    brightSelect.selector.handleRelease();
+                    if (user.dragging) {
+                        user.dragging = false;
+                    }
+                }
+                
+            },"color-select-canvas");
+            
+        </script>
+        
+        <!--Brush and Eyedropper-->
+        <script type="application/javascript">
+        
+            /*EYEDROPPER*/
+            var eyedropper = {
+                btn: getById("eyedropper-button"),
+                activeClass: "eyedropper-active",
+                name: "Eyedropper",
+                outlineClr: "#233327",
+                siz: 30,
+                changeStyle: function() {
+                    /*Change style of button*/
+                    const c = this.activeClass;
+                    if (user.pickingClr) {
+                        this.btn.classList.add(c);
+                    } else {
+                        this.btn.classList.remove(c);
+                    }
+                },
+                init: function() {
+                    /*when user clicks eyedropper button*/
+                    /*if user idle*/
+                    if (user.notBusy()) {
+                        user.pickingClr = true;
+                        /*Change button*/
+                        this.changeStyle();
+                        this.btn.textContent = "Choose color";
+                    } else if (user.pickingClr) {
+                        /*If user picking color,
+                          but clicked eyedropper button
+                          again = cancel*/
+                        user.pickingClr = false;
+                        /*Temporary text*/
+                        tempTxt(this.btn, this.name,
+                                "Canceled", 700);
+                        /*Change style*/
+                        this.changeStyle();   
+                    }
+                },
+                display: function() {
+                    /*If user is picking clr*/
+                    if (user.pickingClr) {
+                        /*Get clr at mouse pos*/
+                        const clr = get(mouseX, mouseY);
+                        /*Display color as square*/
+                        fill(clr);
+                        stroke(this.outlineClr);
+                        strokeWeight(1);
+                        rect(mouseX, mouseY,
+                             this.siz, this.siz, 5);
+                    }
+                },
+                handleClick: function() {
+                    /*Click to change brush clr*/
+                    if (user.pickingClr) {
+                        /*set clr*/
+                        user.currClr = get(mouseX, mouseY);
+                        user.currClr[3] = 255;
+                        user.pickingClr = false;
+                        user.changedClr = true;
+                        /*Change button*/
+                        this.changeStyle();
+                        this.btn.textContent = this.name;
+                    }
+                }
+            };
+        
+            /*BRUSH*/
+            var brush = {
+                /*Point with user's cursor
+                  to show brush size and clr*/
+                preview: function() {
+                    /*background image*/
+                    sketch.drawCurrFrame();
+                    /*If user idle*/
+                    if (user.notBusy() &&
+                        mouseIn(mouseX, mouseY, 
+                                width, height)) {
+                        /*draw point at mouse pos*/
+                        const c = user.currClr;
+                        stroke(c);
+                        strokeWeight(user.currSize);
+                        point(mouseX, mouseY);
+                    }
+                },
+                run: function() {
+                    /*Check if mouse in range*/
+                    const inRange = mouseIn(
+                        mouseX, mouseY, 
+                        width, height
+                    );
+                    /*If user idle*/
+                    if (user.notBusy() &&
+                        inRange) {
+                        /*Initialize stroke*/
+                        user.drawing = true;
+                        sketch.initStroke();
+                        /*Build stroke for
+                          first point (otherwise
+                          it would be cut off)*/
+                        sketch.buildStroke(
+                            pmouseX, 
+                            pmouseY
+                        );
+                    }
+                    if (user.drawing) {
+                        /*Draw and build string for stroke*/
+                        stroke(user.currClr);
+                        strokeWeight(user.currSize);
+                        line(pmouseX, pmouseY,
+                             mouseX, mouseY);
+                        sketch.buildStroke(mouseX, mouseY);
+                    }
+                },
+                handleRelease: function() {
+                    if (user.drawing) {
+                        user.drawing = false;
+                        /*Finish stroke strng and
+                          add to data*/
+                        sketch.finishStroke();
+                    }
+                }
+            };
+        
+        </script>    
+        
+        <!--Drawing Canvas-->
+        <script type="application/javascript">
+        
+            /*SETUP*/
+            function setup() {
+                const canvas = createCanvas(400, 400);
+                canvas.parent("drawing-canvas");
+                rectMode(CENTER);
+                pixelDensity(1);
+                background(255);
+                /*Set earliest state and
+                  draw saveData if any*/
+                sketch.initSketch();
+            }
+            
+            /*MOUSE DRAGGED*/
+            function mouseDragged() {
+                if (mouseIn(mouseX, mouseY, width, height)) {
+                    brush.run();
+                } else {
+                    /*If brush outside canvas,
+                      then stop drawing*/
+                    brush.handleRelease();
+                    user.dragging = true;
+                }
+            }
+            
+            /*MOUSE RELEASED*/
+            function mouseReleased() {
+                brush.handleRelease();
+                if (user.dragging) {
+                    user.dragging = false;
+                }
+            }
+            
+            /*MOUSE MOVED*/
+            function mouseMoved() {
+                /*Preview clr and size at cursor*/
+                brush.preview();
+                /*Run eyedropper*/
+                eyedropper.display();
+            }
+            
+            /*MOUSE CLICKED*/
+            function mouseClicked() {
+                if (mouseIn(mouseX, mouseY, width, height)) {
+                    eyedropper.handleClick();
+                }
+            }
+            
+            /*KEYBOARD*/
+            window.addEventListener("keyup", function() {
+                const k = key.toString();
+                /*z to undo*/
+                if (k === "z") {
+                    sketch.undo();
+                } else if (k === "r") {
+                    /*r to redo*/
+                    sketch.redo();
+                }
+            });
+
+        </script>
+        
+    </body>
+</html>
